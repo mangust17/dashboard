@@ -1,0 +1,767 @@
+:root {
+    --color1: #000000;
+    --color2: #ff00f2;
+}
+
+
+
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #872095;
+    /* Цвет ползунка */
+}
+
+::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+    /* Цвет трека */
+}
+
+* {
+    border-radius: 0 !important;
+}
+
+header,
+footer {
+    padding-bottom: 20px;
+    padding-top: 20px;
+}
+
+::placeholder {
+    color: white;
+}
+
+a {
+    text-decoration: none;
+    font-weight: bold;
+    color: white;
+}
+
+td {
+    vertical-align: middle;
+    text-align: center;
+    
+}
+
+select, input {
+    background-color: #323232;
+    color: white;
+
+}
+
+
+header {
+    background: #000000;
+    background: -moz-linear-gradient(left, var(--color1) 50%, var(--color2) 100%);
+    background: -webkit-linear-gradient(left, var(--color1) 50%, var(--color2) 100%);
+    background: linear-gradient(to right, var(--color1) 50%, var(--color2) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=var(--color1), endColorstr=var(--color1), GradientType=1);
+
+}
+
+.optone {
+    padding-top: 10px;
+}
+
+.logo {
+    max-width: 80px;
+    margin-right: 20px;
+
+}
+
+.btn-oo {
+    display: block;
+    max-width: 250px;
+    color: var(--bs-white);
+    float: right;
+    margin-left: 10px;
+}
+
+.btn-oo:hover {
+    color: var(--bs-white);
+    background-color: var(--color1);
+
+}
+
+.menu_li {
+    background-color: #000000;
+    color: white;
+
+}
+
+
+.about {
+    background-color: #000000;
+    /* background: linear-gradient(to right,  var(--color1) 50%,var(--color2) 100%); */
+}
+
+.content {
+    background-color: rgb(36, 36, 36);
+    border-color: white;
+
+    padding-left: 10px;
+    color: white;
+}
+
+.list-group-item.active {
+    background: linear-gradient(to right, var(--color2) 50%, var(--color1) 100%);
+    border-color: white;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #000000;
+    color: white;
+}
+
+.accordion-button:not(.collapsed)::after {
+    filter: brightness(0%) invert(70%);
+}
+
+.accordion-button:focus {
+    box-shadow: inherit;
+}
+
+.orders {
+    border: 1px;
+}
+
+.blog_pic {
+    max-width: 40%;
+    float: left;
+}
+
+.post_content {
+    text-align: left;
+}
+
+.custom-autocomplete .ui-menu-item {
+    background-color: white;
+    /* Устанавливаем фон для каждого элемента списка подсказок */
+    border: 1px solid #ccc;
+}
+
+.ui-autocomplete {
+    background-color: white !important;
+    border: 1px solid #ccc !important;
+    max-width: 20%;
+}
+
+.ui-menu-item {
+    background-color: white !important;
+
+}
+
+#loader {
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid #3498db;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.form_date {
+    max-width: 100px;
+}
+
+.model-type {
+    max-width: 270px;
+    border: 1px;
+    border-color: #3498db;
+    background-color: #2b2a2b;
+    color: white;
+
+
+}
+
+.model-style {
+    max-width: 100px;
+}
+
+.acc-table {
+    font-size: smaller;
+    /* border :none; */
+}
+
+.red-text {
+    color: red;
+    font-weight: bold;
+}
+
+.cell-wrapper {
+    position: relative;
+    min-width: 30%;
+}
+
+.prices {
+    color: rgb(255, 255, 255);
+}
+
+.little_head {
+    background-color: #000000;
+    color: white;
+}
+
+.rounded-chart {
+    border-radius: 10px;
+    /* Регулируйте значение для получения нужного эффекта скругления */
+    overflow: hidden;
+    /* Гарантирует, что содержимое, выходящее за пределы, будет обрезано */
+}
+
+.darken-on-hover {
+    transition: filter 0.3s ease;
+}
+
+.darken-on-hover:hover {
+    filter: brightness(180%);
+    /* Применяем затемнение при наведении */
+}
+
+.form-control,
+.custom-select,
+.form-select {
+    background-color: #424242;
+    color: white;
+    border: none;
+    border-radius: 0;
+
+}
+
+.form-control::placeholder {
+    color: white; /* Новый цвет placeholder */
+}
+
+table .form_disabled_red {
+    background-color: #432b2b !important;
+    color: white;
+}
+
+/* Стили для чекбоксов */
+input[type="checkbox"] {
+    background-color: #ff00f2;
+    /* Цвет фона чекбокса */
+    cursor: pointer;
+    /* Изменение формы указателя при наведении на чекбокс */
+    box-sizing: border-box;
+    /* Учитывает padding и border при расчете размеров элемента */
+    margin: 3px 3px 3px 4px;
+    /* Отступы чекбокса */
+    padding: initial;
+    /* Сброс стилей для внутреннего отступа */
+    border: initial;
+    /* Сброс стилей границы */
+    appearance: auto;
+    /* Сброс стилей appearance для браузерной стандартности */
+}
+
+/* Стиль для активного (выбранного) чекбокса */
+input[type="checkbox"]:checked {
+    background-color: #ff00f2;
+    /* Цвет фона для активного чекбокса */
+    /* Дополнительные стили, если необходимо */
+}
+
+.accordion-button:focus {
+    border-color: #ff00f2;
+}
+
+.btn-danger {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #300f30;
+    --bs-btn-border-color: #f41fe5;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #981d9e;
+    --bs-btn-hover-border-color: #b02a37;
+    --bs-btn-focus-shadow-rgb: 225, 83, 97;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #981d9e;
+    --bs-btn-active-border-color: #a52834;
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #981d9e;
+    --bs-btn-disabled-border-color: #dc3545;
+    background: linear-gradient(to right, #300f30, #981d9e);
+    height: 30px;
+}
+
+.graphs {
+    border: 1px solid #981d9e;
+
+}
+
+#drop-area {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+}
+
+#drop-area.highlight {
+    background-color: #f0f8ff;
+}
+
+.lighting:hover {
+    background: linear-gradient(135deg, #000000 0%, #e000dc 100%);
+    cursor: pointer;
+}
+
+
+.pad-3 {
+    margin-left: 35%;
+}
+
+.fon_icons {
+    font-size: 30px;
+}
+
+.info-block {
+    max-width: 600px;
+}
+
+.info-img {
+    max-width: 400px;
+}
+
+.starts {
+    background-color: #000000;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    /* 100% высоты окна просмотра */
+    margin: 0;
+    /* Убираем отступы у body */
+}
+
+.tesss {
+    width: 600px;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ddd {
+    margin: auto;
+}
+
+.start-form {
+    /* border: 1px solid #e000dc; */
+    padding: 20px;
+    margin: auto;
+}
+
+.start-form-field {
+    margin-bottom: 15px;
+    font-size: 25px;
+
+}
+
+.start-button {
+    width: 100%;
+    background-color: #981d9e;
+    color: white;
+    height: 40px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+#id_username {
+    font-size: 25px;
+}
+
+.glow {
+    transition: box-shadow 0.5s ease-in-out;
+}
+
+.glowing {
+    box-shadow: 0 0 20px #f91be3;
+    /* Замените #00ff00 на цвет вашего свечения */
+    filter: brightness(1.5);
+}
+
+.table-dark th {
+    color: #fa99ff;
+    margin: auto;
+    font-size: small;
+    text-align: center;
+
+}
+
+.table tr, .nav-item, p {
+    font-size: small;
+}
+
+
+.bz {
+    background-color: rgb(102, 3, 107);
+    border: none;
+}
+
+
+.bb {
+    margin-left: 10px;
+    background-color: rgb(102, 3, 107);
+    float: right;
+    border: none;
+}
+
+.purple_border {
+    border: 1px solid #d016da;
+}
+
+td, th {
+    margin-bottom: 0px;
+    padding: 0.1rem 0.1rem !important;
+}
+
+.jq_popup {
+    display: none;
+    position: absolute;
+    padding: 10px;
+    background-color: #000000;
+    border: 1px solid #e21be6;
+    z-index: 1;
+}
+
+.icon_button {
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.sorted_table th {
+    cursor: pointer;
+
+}
+
+.sorted_table th:hover {
+    background-color: #2b2a2b;
+}
+
+.arrow_sort {
+    color: #ee39dc;
+    font-weight: bold;
+    -webkit-text-stroke: 1px #f389ff;
+
+}
+
+.scrollable_div {
+    max-height: 1068px;
+    overflow-y: auto;
+}
+
+.parse_div {
+    background-color: #2b2a2b;
+    font-size: larger;
+    border: 3px solid #7a277a;
+}
+
+.processed {
+    background-color: #f41fe5 !important;
+}
+
+.banners {
+    max-width: 90%;
+}
+
+.grad_horizontal {
+    background: linear-gradient(to right, #ff32ff 1%, #2dd0ed 61%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    height: 20px;
+    margin-bottom: 2px;
+}
+
+.horizontal_menu {
+    background-color: #323232;
+    border: 1px solid black;
+    vertical-align: middle;
+    color: white;
+}
+
+.no_round_borders {
+    border-radius: 0;
+}
+
+.list-group-horizontal {
+    border-radius: 0;
+
+}
+
+.right_tools {
+    border-left: 3px solid black;
+
+}
+
+.Select-menu-outer {
+    color: #872095;
+    background-color: #000000;
+}
+
+.content_right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+
+.sticky_table thead {
+    position: sticky;
+    top: 0;
+}
+
+.card {
+    background: none;
+    color: white;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.border-danger {
+    border-color: #981d9e !important;
+    border-radius: 5px !important;
+}
+
+.card-header {
+    background-color: #424242;
+}
+
+.text-area {
+    width: 100%;
+    height: 60vh;
+    /* Задайте желаемую высоту */
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+    /* Разрешить изменение размера по вертикали */
+    color: white;
+}
+
+.text-area:focus {
+    width: 100%;
+    height: 60vh;
+    /* Задайте желаемую высоту */
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+    /* Разрешить изменение размера по вертикали */
+    color: white;
+    background-color: #424242;
+}
+
+.text-area::placeholder {
+    color: white;
+    /* Цвет текста плейсхолдера */
+}
+
+.catalog-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #cf30ee;
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.catalog-button:hover {
+    background-color: #005294;
+}
+
+.dash_card_head {
+    min-height: 120px;
+    border-radius: 10px !important;
+    border: none;
+    background: linear-gradient(to bottom, rgba(249,49,236,0.38) 0%,rgba(125,185,232,0.25) 99%,rgba(125,185,232,0.25) 100%);
+    font-size: 200%;
+}
+
+.modal-body, .modal-header, .modal-footer {
+    background-color: #2b2a2b;
+    color: white;
+}
+
+/* Gradient Animation Button
+/******************************/
+.lighting_button{
+	border: 0;
+	position: relative;
+	border-radius: 12px;
+	color: #fff;
+	background: #000;
+	padding: 0 16px;
+	box-shadow: 0 0 0 1px 0 0 0 1px rgba(255, 255, 255, 0.14);
+	max-width: 100%;
+	justify-content: center;
+	align-items: center;
+	transition-property: border-color, background, color, transform, box-shadow;
+	transition-duration: .15s;
+	transition-timing-function: ease;
+	font-size: 16px;
+	line-height: 50px;
+	height: 50px;
+	width: 100%;
+	max-width: 250px;
+	transition: 0.25s;
+}
+
+.highlight-bg1 {
+
+	background: inherit;
+	border-radius: 12px;
+	background: linear-gradient(-90deg, #007cf0, #00dfd8, #ff0080, #007cf0);
+	background-size: 400% 100%;
+	border: none;
+	padding: 0;
+	margin: 0;
+	animation: background-anim 8s ease-in-out infinite;
+}
+
+
+
+.highlight-bg:after {
+	content: "";
+	position: absolute;
+	background-size: inherit;
+	background-image: inherit;
+	animation: inherit;
+	left: 0;
+	right: 0;
+	top: 2px;
+	height: 100%;
+	filter: blur(.5rem);
+	transition: 0.25s;
+}
+
+@keyframes background-anim {
+	50% {
+		background-position: 140% 50%;
+		transform: skew(-2deg);
+	}
+}
+
+/*****************/
+
+.invisible_button {
+    background:none;
+    border: none;
+    color:rgb(247, 120, 252)
+}
+
+.select2-search__field .select2-container {
+    background-color:#232323 !important;
+    color: white !important;
+    z-index: 1100 !important;
+
+}
+
+.select2-dropdown, .select2-selection, .select2-selection__rendered, .select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color:#232323 !important;
+    color: white !important;
+    z-index: 1075 !important;
+    width: 100%;
+}
+
+body .select2-container {
+    z-index: 9999 !important;
+    width: 100vh;
+    background-color: #232323;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    background-color: rgb(36, 36, 36);
+}
+
+
+.nav.nav-tabs .nav-link.active {
+    background-color: rgba(45, 104, 131, 0.33);
+    border: none;
+    color:white;
+}
+
+.nav.nav-tabs {
+    color: white;
+}
+
+.nav-link {
+    color:white;
+}
+
+.nav-link:hover, .nav-link:focus {
+    color: #ffc0fa;
+}
+
+
+.side-menu-container {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    z-index: 999; /* чтобы кнопка была поверх других элементов */
+}
+
+.side-menu-button {
+    /* Стили для кнопки */
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.Select-menu-outer {
+    background-color: #251421 !important;
+    color: white;
+}
+
+.Select-control {
+    height: 48px;
+    background-color: #251421 !important;
+    color:white !important;
+}
+
+.Select-value-label, .Select-placeholder{
+    height: 38px;
+    color:white;
+    line-height: 38px;
+}
+.big-app-div{
+    color: white;
+}
+
+.big-app-div div.col {
+    margin: 0;
+}
+
+iframe {
+    height: 20px;
+}
+
+
