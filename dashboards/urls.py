@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import dash_graph
+from .views import *
 
 urlpatterns = [
-    path('', dash_graph, name='dash-graph'),
+    path('y2y', dash_graph, name='y2y'),
+    path('', plotly_dash, name='home'),
 ]

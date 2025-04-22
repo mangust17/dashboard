@@ -5,4 +5,4 @@ class DashboardsConfig(AppConfig):
     name = 'dashboards'
 
     def ready(self):
-        import dashboards.dash_apps.y2y
+        import dashboards.dash_apps.y2y, dashboards.dash_apps.gr_big_dash
