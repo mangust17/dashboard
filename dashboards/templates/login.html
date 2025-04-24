@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Вход</title>
+  {% load static %}
+<link href="{% static 'css/login.css' %}" rel="stylesheet">
+{% include "styles.html" %}
+</head>
+<body>
+  <form method="post" class="login-form">
+    <h2>Вход</h2>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.username.errors }}
+    <input type="text" name="username" placeholder="Логин" required id="id_username">
+    {{ form.password.errors }}
+    <input type="password" name="password" placeholder="Пароль" required id="id_password">
+    <button type="submit">Войти</button>
+  </form>
+</body>
+</html>
