@@ -12,7 +12,18 @@
 <!-- Sidebar Start -->
 {% if request.path|slice:":9" != "/profile/" %}
   <div class="sidebar pe-4 pb-3">
+    
     <nav class="navbar bg-secondary navbar-dark">
+      <a href="{% url 'home' %}" class="navbar-brand mx-4 mb-3">
+        <h3 class="text-primary">
+          <img src="{% static 'img/logo.png' %}"
+               alt=""
+               style="width:50px;
+                      margin-right:10px"
+               class="mx-2">
+          Stat-master
+        </h3>
+      </a>
             <a href="{% url 'home' %}" class="dropdown-item">Общие</a>
             <a href="{% url 'y2y' %}" class="dropdown-item">Год к году</a>
             <a href="{% url 'info' %}" class="dropdown-item" style="white-space: normal;">

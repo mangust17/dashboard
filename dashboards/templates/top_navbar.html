@@ -1,100 +1,21 @@
-{% load static %}
-<div class="sticky-top">
-  <nav class="navbar navbar-expand bg-secondary navbar-dark px-4 py-0">
+<nav class="navbar navbar-expand bg-secondary navbar-dark sticky-top px-4 py-0">
     <a href="{% url 'home' %}" class="navbar-brand d-flex d-lg-none me-4">
-      <h2 class="text-primary mb-0"><i class="fa fa-user-edit"></i></h2>
+        <h2 class="text-primary mb-0"><i class="fa fa-chart-line"></i> Stat Master</h2>
     </a>
-    <a href="#" class="sidebar-toggler flex-shrink-0"><i class="fa fa-bars"></i></a>
-    <form class="d-none d-md-flex ms-4">
-      <input class="form-control bg-dark border-0" type="search" placeholder="Search">
-    </form>
-
-    {% if request.path|slice:":6" == "/shop/" %}
-      <div class="mx-2">{% include 'customers/blocks/modal_button.html' %}</div>
-    {% endif %}
-
+    <a href="#" class="sidebar-toggler flex-shrink-0">
+        <i class="fa fa-bars"></i>
+    </a>
     <div class="navbar-nav align-items-center ms-auto">
-      {% if request.path|slice:":6" == "/shop/" %}
-        <a href="{% url 'cart' %}" class="nav-link">
-          <i class="fa fa-cart-shopping me-lg-2"></i>
-          <span class="d-none d-lg-inline-flex">Корзина</span>
-        </a>
-      {% endif %}
-
-      <div class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-          <i class="fa fa-envelope me-lg-2"></i>
-          <span class="d-none d-lg-inline-flex">Сообщения</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-end bg-secondary border-0 rounded-0 rounded-bottom m-0">
-          {% if chats_with_messages %}
-            {% for item in chats_with_messages %}
-              <a href="{% url 'dialog' chat_id=item.chat_id %}" class="dropdown-item">
-                <div class="d-flex align-items-center">
-                  <img 
-                      src="{{ item.img_url }}" 
-                      alt="Avatar" 
-                      class="rounded-circle me-3" 
-                      style="width: 50px; height: 50px; border: 2px solid var(--primary);">
-                     
-                  <div class="ms-2">
-                    {% if item.chat.is_group %}
-                      <h6 class="fw-normal mb-0">{{ item.chat.name|default:"Групповой чат" }}</h6>
-                    {% else %}
-                      <h6 class="fw-normal mb-0">{{ item.user.user.username }} отправил вам сообщение</h6>
-                    {% endif %}
-                    <small>{{ item.last_message_time|timesince }} назад</small>
-                  </div>
-                </div>
-              </a>
-
-            {% endfor %}
-          {% else %}
-            <div class="text-center p-2 text-light">Чаты не найдены.</div>
-          {% endif %}
-          <hr class="dropdown-divider">
-          <a href="{% url 'chats' %}" class="dropdown-item text-center">Посмотреть все сообщения</a>
+        <div class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                <span class="d-none d-lg-inline-flex">{{ user.username }}</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end bg-secondary border-0 rounded-0 rounded-bottom m-0">
+                <a href="{% url 'logout' %}" class="dropdown-item">
+                    <i class="fa fa-sign-out-alt me-2"></i>Выйти
+                </a>
+            </div>
         </div>
-      </div>
-
-      <div class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-          <i class="fa fa-bell me-lg-2"></i>
-          <span class="d-none d-lg-inline-flex">Уведомления</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-end bg-secondary border-0 rounded-0 rounded-bottom m-0">
-          {% if notifications_cp %}
-            {% for notification in notifications_cp|slice:":5" %}
-              <a href="{% url 'notifications' %}?id={{ notification.pk }}" class="dropdown-item">
-                <div class="d-flex align-items-center">
-                  <div class="ms-2">
-                    <h6 class="fw-normal mb-0">Новое уведомление от {{ notification.sender }}</h6>
-                    <small>{{ notification.date_time }}</small>
-                  </div>
-                </div>
-              </a>
-            {% endfor %}
-            <a href="{% url 'notifications' %}" class="dropdown-item text-center">See all notifications</a>
-          {% else %}
-            <div class="text-center p-2 text-light">Нет уведомлений.</div>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="nav-item dropdown">
-        <a href="{% url 'profile' %}" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-          <img class="rounded-circle me-lg-2" 
-               src="{{ MEDIA_URL }}user_photo/{{ user.users.img|default:'default-avatar.png' }}" 
-               alt="Profile" 
-               style="width: 40px; height: 40px;">
-          <span class="d-none d-lg-inline-flex">{{ user.username }}</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-end bg-secondary border-0 rounded-0 rounded-bottom m-0">
-          <a href="{% url 'profile' %}" class="dropdown-item">My Profile</a>
-          <a href="{% url 'logout' %}" class="dropdown-item">Log Out</a>
-        </div>
-      </div>
     </div>
-  </nav>
-  <div class="col grad_horizontal highlight-bg1 sticky-top"></div>
-</div>
+</nav>
+<div class="col grad_horizontal highlight-bg1 sticky-top"></div>

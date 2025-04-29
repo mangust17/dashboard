@@ -15,6 +15,7 @@
     <body data-bs-theme="dark" class="bg-secondary text-light">
         <div class="container-fluid position-relative d-flex p-0">{% include "menu.html" %}</div>
         <div class="content">
+            {% include 'top_navbar.html' %}
             {% block content %}
             {% endblock content %}
         </div>

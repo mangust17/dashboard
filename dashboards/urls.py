@@ -8,4 +8,5 @@ urlpatterns = [
     path('', login_view, name='login'),
     path('info', info, name='info'),
     path('dash', plotly_dash, name='home'),
+    path('logout',logout_user ,name = 'logout'),
 ]
