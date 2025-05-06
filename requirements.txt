@@ -13,7 +13,7 @@ Django==4.2
 django-plotly-dash==2.2.2
 dpd-static-support==0.0.5
 dpd_components==0.1.0
-Flask==3.1.0
+Flask==3.0.3
 itsdangerous==2.2.0
 Jinja2==3.1.6
 lxml==5.4.0
