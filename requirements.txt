@@ -1,5 +1,5 @@
 asgiref==3.8.1
-blinker==1.9.0
+blinker==1.8.2
 bootstrap4==0.1.0
 channels==4.2.2
 click==8.1.8
