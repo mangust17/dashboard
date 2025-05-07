@@ -11,7 +11,7 @@ def plotly_dash(request):
     return render(request, "dashboards/plotly_dash.html", context)
 
 def info(request):
-    return render(request, "info.html")
+    return render(request, "Info.html")
 
 
 def login_view(request):
