@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-eyf^j)^r^-*brjx9+65f@)v50r@-@#-$ojvypow59zk$(1y$%k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['opt-one.ru','www.opt-one.ru']
+ALLOWED_HOSTS = ['optone-partners.ru','www.optone-partners.ru', '127.0.0.1', 'localhost', '31.31.197.28']
 
 
 # Application definition
