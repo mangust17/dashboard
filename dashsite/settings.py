@@ -181,3 +181,5 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 import os
 STATIC_ROOT = BASE_DIR / 'staticfiles' 
+print('путь')
+print(STATIC_ROOT)
