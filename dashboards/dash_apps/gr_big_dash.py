@@ -3,7 +3,7 @@ from .app_graphs import *
 from dash import html, dcc, dash_table
 from dash.dash_table import FormatTemplate
 from dash.dash_table.Format import Format, Scheme
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from datetime import date, timedelta
 from django_plotly_dash import DjangoDash
@@ -14,6 +14,8 @@ from django.db.models import Window, Avg, Sum, Min
 import pandas as pd
 import plotly.express as px
 import copy
+import dash_bootstrap_components as dbc
+from dash.dependencies import ALL, MATCH
 
 external_stylesheets = ['/static/css/bootstrap.min.css', '/static/css/style.css']
 external_scripts = ['/static/js/bootstrap.min.js']
@@ -25,13 +27,30 @@ app = DjangoDash('BigGraph', external_stylesheets=external_stylesheets, external
 
 queryset = PricesClean.objects.filter(date__range=(start_date, end_date)).values('date','model').annotate(price=Avg('price'), quantity = Avg('quantity'))
 df = pd.DataFrame.from_records(queryset)
-df = gf_price_normalize(df)
 
-    # Таблица нормализация
+def get_group_from_dataframe(row):
+    model = row['model']
+    if '13' in model or '14' in model:
+        return '13, 14'
+    elif '15 PRO' in model or '15 PRO MAX' in model:
+        return '15 PRO, 15 PRO MAX'
+    elif '15' in model or '15 PLUS' in model:
+        return '15, 15 PLUS'
+    elif '16 PRO' in model or '16 PRO MAX' in model:
+        return '16 PRO, 16 PRO MAX'
+    elif '16' in model or '16 PLUS' in model:
+        return '16, 16 PLUS'
+    else:
+        return 'OTHER'
+    
+df = gf_price_normalize(df)
+df['group'] = df.apply(get_group_from_dataframe, axis=1)    
+print(df.columns)
+
+# Таблица нормализация
 df_for_tables = pd.DataFrame.from_records(PricesClean.objects.filter(date__gte=start_date).values())
 df_for_tables = gf_price_normalize(df_for_tables)
 full_df = df_for_tables.copy()
-
 
 top5 = PricesClean.objects.filter(date__gte=start_date).values('model').annotate(quantity=Sum('quantity')).order_by('-quantity').values_list('model', flat=True)[:5]
 top5 = list(top5)
@@ -39,7 +58,6 @@ top5 = list(top5)
 df_for_tables = df_for_tables[df_for_tables['date']==df_for_tables['last_date']][['model','current_price','median_price','date','price','min_price']]
 
 df_for_tables['delta'] = (df_for_tables['current_price']-df_for_tables['median_price'])/df_for_tables['median_price']
-
 
 # Установка стандартных значения для layout
 default_layout = go.Layout(
@@ -51,6 +69,50 @@ default_layout = go.Layout(
     template='plotly_dark'
 )
 
+def split_list(lst, n):
+    k, m = divmod(len(lst), n)
+    return [lst[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n)]
+
+modal_body = []
+grouped = df.groupby("group")
+for group_name, group_df in grouped:
+    group_models = group_df["model"].unique().tolist()
+    modal_body.append(
+        html.Details([
+            html.Summary([
+                dcc.Checklist(
+                    options=[{"label": html.Span("Группа:", style={"color": "white","fontSize": "14px"}), "value": "ALL"}],
+                    value=[],
+                    id={'type': 'group-select-all', 'index': group_name},
+                    inline=True,
+                    style={
+                        'display': 'inline-block',
+                        'marginRight': '10px',
+                        'fontSize': '14px',
+                        'fontWeight': 'bold'
+                    },
+                    inputStyle={"marginRight": "5px"},
+                ),
+                html.Span(group_name, style={
+                    "color": "white",
+                    "fontSize": "14px",
+                    "fontWeight": "bold",
+                    "marginLeft": "10px"
+                })
+            ]),
+            dcc.Checklist(
+                options=[{"label": m, "value": m} for m in group_models],
+                value=[m for m in top5 if m in group_models],
+                id={'type': 'model-group-checklist', 'index': group_name},
+                className="form-check text-white",
+            )
+        ], open=True, className="mb-3")
+    )
+
+modal_body_columns = split_list(modal_body, 3)
+modal_body_layout = dbc.Row(
+    [dbc.Col(children=col, width=4) for col in modal_body_columns]
+)
 
 app.layout = html.Div([  # Container
     html.Div([  # Row
@@ -65,29 +127,13 @@ app.layout = html.Div([  # Container
                                     initial_visible_month=date.today(),
                                     start_date=date.today()-timedelta(days=30),
                                     end_date=date.today(),
-                                    className="bg-dark p-0"
-                                ),
-                            ]),
-                            html.Div([
-                                html.Label('Выберите Модели'),
-                                html.Br(),
-                                dcc.Dropdown(
-                                    id="model-dropdown",
-                                    multi=True,
-                                    options=[
-                                        {'label': model, 'value': model} for model in df['model'].unique()],
-                                    value=top5,
-                                    placeholder="Выберите модель",
-                                    style={"minWidth":"300px"},
-                                    clearable=True,
-                                    className="mx-2"
-                                )
+                                    className="bg-dark p-0"),
                             ]),
                             html.Div([
                                 dcc.Checklist(
                                     id="country-check",
-                                    options=['Показывать Китай'],
-                                    value=['Показывать Китай'],
+                                    options=['Показывать Китай','Показывать Гонконг','Показывать Другое'],
+                                    value=['Показывать Китай','Показывать Гонконг'],
                                     className="form-check"
                                 )
                             ], className="d-flex align-items-center mt-4"),
@@ -97,7 +143,83 @@ app.layout = html.Div([  # Container
                                 options=['Считаем по минимуму', 'Считаем по среднему'],
                                 value='Считаем по среднему',
                                 className='form-check'
-                                )],className="d-flex align-items-center mt-4")
+                                )],className="d-flex align-items-center mt-4"),
+                            html.Div([
+                                dcc.RadioItems(
+                                id='ddp_check',
+                                options=['Считаем без наценки', 'Считаем ddp', 'Считаем ddp + НДС'],
+                                value='Считаем без наценки',
+                                className='form-check'
+                                )],className="d-flex align-items-center mt-4"),
+                            html.Div([
+                                    html.Button(
+                                            "Выбрать модели",
+                                            id="open-models-modal",
+                                            className="btn btn-primary-secondary",
+                                            style={
+                                                "margin-top": "20px",
+                                                "margin-left": "15px",
+                                                "width": "130px",
+                                                "height": "50px",
+                                                "display": "flex",
+                                                "justifyContent": "center",
+                                                "alignItems": "center",
+                                                "borderRadius": "10px",
+                                            },
+                                        ),
+                                        dcc.Store(id='selected-models', data=top5),
+                                        dbc.Modal([
+                                            dbc.ModalHeader(dbc.ModalTitle("Выберите модели")),
+                                            dbc.ModalBody(modal_body_layout),
+                                            dbc.ModalFooter(
+                                                dbc.Button("Применить", id="apply-models", className="ms-auto")
+                                            )
+                                        ],
+                                            id="models-modal",
+                                            is_open=False,
+                                            centered=False,
+                                            size="xl",
+                                            style={"marginTop": "5vh"},
+                                            backdrop="static",
+                                            scrollable=True
+                                        )
+                                    ]),
+                            html.Button("DDP", id="ddp-settings-btn", n_clicks=0, className="btn btn-primary-secondary",style={
+                                                                                                                                "margin-top": "20px",
+                                                                                                                                "margin-left": "15px",
+                                                                                                                                "width": "130px",       
+                                                                                                                                "height": "50px",
+                                                                                                                                "display": "flex",
+                                                                                                                                "justifyContent": "center",
+                                                                                                                                "alignItems": "center",      
+                                                                                                                                "borderRadius": "10px" 
+                                                                                                                                },),
+
+                             dbc.Modal(
+                                        [
+                                            dbc.ModalHeader(dbc.ModalTitle("Настройки коэффициентов DDP")),
+                                            dbc.ModalBody([
+                                                html.Label("Цена дороги"),
+                                                dcc.Input(id="ddp-logistics", type="number", value=5.0, step=0.01, className="form-control mb-2"),
+                                                html.Label("Маржа"),
+                                                dcc.Input(id="ddp-margin", type="number", value=0.0, step=0.01, className="form-control mb-2"),
+                                                html.Label("Пошлина"),
+                                                dcc.Input(id="ddp-duty", type="number", value=1.0, step=0.01, className="form-control mb-2"),
+                                                html.Label("Ставка перевода"),
+                                                dcc.Input(id="ddp-conv", type="number", value=1.5, step=0.01, className="form-control mb-2"),
+                                            ]),
+                                            dbc.ModalFooter(
+                                                dbc.Button("Закрыть", id="ddp-close-btn", className="ms-auto", n_clicks=0)
+                                            )
+                                        ],
+                                        id="ddp-modal",
+                                        is_open=False,
+                                        centered=False,
+                                        size="lg",
+                                        style={"marginTop": "5vh"},
+                                        backdrop="static",
+                                        scrollable=False
+                                    )
             ], className="bg-secondary p-4 rounded input-group")
         ], className="col-12"),
         html.Div([
@@ -293,64 +415,157 @@ app.layout = html.Div([  # Container
 ], className="container-fluid p-4") #Container
 
 @app.callback(
-    [Output('price-graph-1', 'figure'),
-     Output('stocks-graph-1', 'figure'),
-     Output('stocks-tree-1', 'figure'),
-     Output('data-table-fall', 'data'),
-     Output('data-table-grow', 'data'),
-     Output('tabs', 'children'),
-     Output('vendor_graph', 'figure'),
-     Output('tabs2', 'children'),
-     Output('double-y-graph', 'figure'),
-     Output('double-y-new', 'figure'),
-     Output('trace_map', 'figure'),
-     Output('trace_box', 'figure'),
-     Output('tabs3', 'children'),
-     Output('tabs4', 'children'),
-     Output('tabs5', 'children'),
-     Output('price-graph-specs', 'figure'),
-     ],
+    Output("country-check", "value"),
+    Input("country-check", "value")
+)
+def sanitize_country_check(value):
+    if "Показывать Другое" in value:
+        return ["Показывать Другое"]
+    return value
+
+@app.callback(
+    Output("ddp-modal", "is_open"),
+    Input("ddp-settings-btn", "n_clicks"),
+    Input("ddp-close-btn", "n_clicks"),
+    State("ddp-modal", "is_open")
+)
+def toggle_modal(open_clicks, close_clicks, is_open):
+    if open_clicks or close_clicks:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("models-modal", "is_open"),
+    [Input("open-models-modal", "n_clicks"),
+     Input("apply-models", "n_clicks")],
+    State("models-modal", "is_open"),
+    prevent_initial_call=True
+)
+def toggle_models_modal(open_click, apply_click, is_open):
+    return not is_open
+
+@app.callback(
+    Output("selected-models", "data"),
+    Input("apply-models", "n_clicks"),
+    State({'type': 'model-group-checklist', 'index': ALL}, 'value'),
+    prevent_initial_call=True
+)
+def save_selected_models(n_clicks, all_selected_lists):
+    all_models = [model for sublist in all_selected_lists if sublist for model in sublist]
+    return all_models
+
+@app.callback(
+    Output({'type': 'model-group-checklist', 'index': MATCH}, 'value'),
+    Input({'type': 'group-select-all', 'index': MATCH}, 'value'),
+    State({'type': 'model-group-checklist', 'index': MATCH}, 'options'),
+    prevent_initial_call=True
+)
+def select_all_models(select_all_value, model_options):
+    if "ALL" in select_all_value:
+        return [opt['value'] for opt in model_options]
+    return []
+
+
+
+
+@app.callback(
+    [
+        Output('price-graph-1', 'figure'),
+        Output('stocks-graph-1', 'figure'),
+        Output('stocks-tree-1', 'figure'),
+        Output('data-table-fall', 'data'),
+        Output('data-table-grow', 'data'),
+        Output('tabs', 'children'),
+        Output('vendor_graph', 'figure'),
+        Output('tabs2', 'children'),
+        Output('double-y-graph', 'figure'),
+        Output('double-y-new', 'figure'),
+        Output('trace_map', 'figure'),
+        Output('trace_box', 'figure'),
+        Output('tabs3', 'children'),
+        Output('tabs4', 'children'),
+        Output('tabs5', 'children'),
+        Output('price-graph-specs', 'figure'),
+    ],
     [
         Input('my-date-picker-range', 'start_date'),
         Input('my-date-picker-range', 'end_date'),
-        Input('model-dropdown', 'value'),
+        Input('selected-models', 'data'), 
         Input('tabs', 'value'),
         Input('tabs2', 'value'),
         Input('country-check', 'value'),
         Input('radio_check', 'value'),
+        Input('ddp_check', 'value'),
         Input('tabs3', 'value'),
         Input('tabs4', 'value'),
         Input('tabs5', 'value'),
-
-    ])
+        Input('ddp-logistics', 'value'),
+        Input('ddp-margin', 'value'),
+        Input('ddp-duty', 'value'),
+        Input('ddp-conv', 'value'),
+    ]
+)
 def update_price_graph_1(
-    start_date, 
-    end_date, 
-    models, 
-    tab, 
-    tab2, 
-    country_check, 
-    radio_check, 
-    tab3, 
+    start_date,
+    end_date,
+    models,
+    tab,
+    tab2,
+    country_check,
+    radio_check,
+    ddp_check,
+    tab3,
     tab4,
-    tab5):
-    
-    tab, tab2, tab3, tab4, tab5 = (models[0] if t not in models and models else t for t in (tab, tab2, tab3, tab4, tab5))
+    tab5,
+    logistics,
+    margin_percent,
+    duty_percent,
+    conversion_rate
+):
+    if not models:
+        return dash.no_update  # fallback
 
-    # Фильтры датасета
-    if len(country_check) == 1:
-        queryset = PricesClean.objects.filter(date__range=(start_date, end_date),model__in=models)
-    else: 
-        queryset = PricesClean.objects.filter(date__range=(start_date, end_date),model__in=models).exclude(country="CN")
+    tab, tab2, tab3, tab4, tab5 = (models[0] if t not in models else t for t in (tab, tab2, tab3, tab4, tab5))
+
+    excluded_countries = []
+    if 'Показывать Китай' not in country_check:
+        excluded_countries.append('CN')
+    if 'Показывать Гонконг' not in country_check:
+        excluded_countries.append('HK')
+    if 'Показывать Другое' in country_check:
+        excluded_countries.extend(['HK', 'CN'])
+
+    print("Выбранные модели:", ", ".join(models))
+
+    queryset = PricesClean.objects.filter(
+        date__range=(start_date, end_date),
+        model__in=models
+    ).exclude(country__in=excluded_countries)
+
+
+
         
     if radio_check=='Считаем по среднему':
         queryset_grouped = queryset.values('date','model').annotate(price=Avg('price'), quantity = Sum('quantity'))
     else:
         queryset_grouped = queryset.values('date','model').annotate(price=Min('price'), quantity = Sum('quantity'))
-     
+
     df = pd.DataFrame.from_records(queryset_grouped)
     df[['price','quantity']]=df[['price','quantity']].astype(int)
-    df = gf_price_normalize(df)  
+    df = gf_price_normalize(df)
+
+    if ddp_check == 'Считаем ddp':
+        dap_price = (df.price + logistics) * (1 + margin_percent / 100)
+        price_with_duty = dap_price * (1 + duty_percent / 100)
+        ddp_price = price_with_duty * (1 + conversion_rate / 100)
+        df.price = ddp_price
+    elif ddp_check == 'Считаем ddp + НДС':
+        dap_price = (df.price + logistics) * (1 + margin_percent / 100)
+        price_with_duty = dap_price * (1 + duty_percent / 100)
+        ddp_price = price_with_duty * (1 + conversion_rate / 100)
+        df.price = ddp_price * 1.2
+
+
 
     # Динамика цен на модели
     trace1 = []
@@ -445,7 +660,7 @@ def update_price_graph_1(
     
     
     
-    print("123123")
+
     
     # Двойной график
     trace_double_new = []
@@ -599,6 +814,7 @@ def update_price_graph_1(
     map_df['date'] = pd.to_datetime(map_df['date'])
     map_df['week'] = map_df['date'].dt.isocalendar().week
     map_df = map_df.groupby(['week','iso_alpha','continent','country'], as_index=False)['qty'].sum()
+    
 
     fig_map = px.scatter_geo(map_df, locations="iso_alpha", color="continent",
                         hover_name="country", size="qty",
@@ -639,5 +855,3 @@ def update_price_graph_1(
         {'data': trace_specs, 'layout': spec_layout}
         )
         
-
-
