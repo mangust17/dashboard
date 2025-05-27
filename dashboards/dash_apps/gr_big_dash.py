@@ -418,10 +418,6 @@ app.layout = html.Div([  # Container
     Output("country-check", "value"),
     Input("country-check", "value")
 )
-def sanitize_country_check(value):
-    if "Показывать Другое" in value:
-        return ["Показывать Другое"]
-    return value
 
 @app.callback(
     Output("ddp-modal", "is_open"),
@@ -528,14 +524,21 @@ def update_price_graph_1(
     tab, tab2, tab3, tab4, tab5 = (models[0] if t not in models else t for t in (tab, tab2, tab3, tab4, tab5))
 
     excluded_countries = []
-    if 'Показывать Китай' not in country_check:
-        excluded_countries.append('CN')
-    if 'Показывать Гонконг' not in country_check:
-        excluded_countries.append('HK')
     if 'Показывать Другое' in country_check:
-        excluded_countries.extend(['HK', 'CN'])
+        if 'Показывать Китай' not in country_check and 'Показывать Гонконг' not in country_check:
+            excluded_countries = ['CN', 'HK']
+        elif 'Показывать Китай' not in country_check:
+            excluded_countries.append('CN')
+        elif 'Показывать Гонконг' not in country_check:
+            excluded_countries.append('HK')
+    else:
+        if 'Показывать Китай' not in country_check:
+            excluded_countries.append('CN')
+        if 'Показывать Гонконг' not in country_check:
+            excluded_countries.append('HK')
 
-    print("Выбранные модели:", ", ".join(models))
+
+    print("Исключены:", ", ".join(excluded_countries))
 
     queryset = PricesClean.objects.filter(
         date__range=(start_date, end_date),
