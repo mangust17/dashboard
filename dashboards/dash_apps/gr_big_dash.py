@@ -418,6 +418,11 @@ app.layout = html.Div([  # Container
     Output("country-check", "value"),
     Input("country-check", "value")
 )
+def update_country_check(value):
+    if not value:
+        return ["Показывать Другое"]
+    return value
+
 
 @app.callback(
     Output("ddp-modal", "is_open"),
@@ -523,20 +528,23 @@ def update_price_graph_1(
 
     tab, tab2, tab3, tab4, tab5 = (models[0] if t not in models else t for t in (tab, tab2, tab3, tab4, tab5))
 
-    excluded_countries = []
-    if 'Показывать Другое' in country_check:
-        if 'Показывать Китай' not in country_check and 'Показывать Гонконг' not in country_check:
-            excluded_countries = ['CN', 'HK']
-        elif 'Показывать Китай' not in country_check:
-            excluded_countries.append('CN')
-        elif 'Показывать Гонконг' not in country_check:
-            excluded_countries.append('HK')
-    else:
-        if 'Показывать Китай' not in country_check:
-            excluded_countries.append('CN')
-        if 'Показывать Гонконг' not in country_check:
-            excluded_countries.append('HK')
+    all_countries = set(
+    PricesClean.objects.filter(
+        date__range=(start_date, end_date),
+        model__in=models
+    ).values_list('country', flat=True).distinct()
+)
 
+    included_countries = set()
+
+    if 'Показывать Китай' in country_check:
+        included_countries.add('CN')
+    if 'Показывать Гонконг' in country_check:
+        included_countries.add('HK')
+    if 'Показывать Другое' in country_check:
+        included_countries.update(all_countries - {'CN', 'HK'})
+
+    excluded_countries = list(all_countries - included_countries)
 
     print("Исключены:", ", ".join(excluded_countries))
 
