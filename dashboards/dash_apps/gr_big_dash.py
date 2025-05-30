@@ -552,10 +552,7 @@ def update_price_graph_1(
         date__range=(start_date, end_date),
         model__in=models
     ).exclude(country__in=excluded_countries)
-
-
-
-        
+  
     if radio_check=='Считаем по среднему':
         queryset_grouped = queryset.values('date','model').annotate(price=Avg('price'), quantity = Sum('quantity'))
     else:
