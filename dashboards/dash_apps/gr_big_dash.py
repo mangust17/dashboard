@@ -184,16 +184,17 @@ app.layout = html.Div([  # Container
                                             scrollable=True
                                         )
                                     ]),
-                            html.Button("DDP", id="ddp-settings-btn", n_clicks=0, className="btn btn-primary-secondary",style={
-                                                                                                                                "margin-top": "20px",
-                                                                                                                                "margin-left": "15px",
-                                                                                                                                "width": "130px",       
-                                                                                                                                "height": "50px",
-                                                                                                                                "display": "flex",
-                                                                                                                                "justifyContent": "center",
-                                                                                                                                "alignItems": "center",      
-                                                                                                                                "borderRadius": "10px" 
-                                                                                                                                },),
+
+                            # html.Button("DDP", id="ddp-settings-btn", n_clicks=0, className="btn btn-primary-secondary",style={
+                            #                                                                                                     "margin-top": "20px",
+                            #                                                                                                     "margin-left": "15px",
+                            #                                                                                                     "width": "130px",       
+                            #                                                                                                     "height": "50px",
+                            #                                                                                                     "display": "flex",
+                            #                                                                                                     "justifyContent": "center",
+                            #                                                                                                     "alignItems": "center",      
+                            #                                                                                                     "borderRadius": "10px" 
+                            #                                                                                                     },)
 
                              dbc.Modal(
                                         [
