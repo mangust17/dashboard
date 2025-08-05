@@ -609,6 +609,11 @@ def update_price_graph_1(
         vendor_qs = PricesClean.objects.filter(date__range=(start_date, end_date),model=tab2).exclude(country="CN").values('date','model','vendor').annotate(price=Avg('price'), quantity = Sum('quantity'))   
              
     vendor_df = pd.DataFrame.from_records(vendor_qs).sort_values('quantity', ascending=False).head(10)
+    
+    vendor_mapping = {}
+    for i, vendor in enumerate(vendor_df['vendor'].unique(), 1):
+        vendor_mapping[vendor] = f"Поставщик {i}"
+    
     for vendor in vendor_df['vendor'].unique():
         vendor_data = vendor_df[(vendor_df['vendor']==vendor)]
         trace3.append(go.Scatter(
@@ -622,7 +627,7 @@ def update_price_graph_1(
                 sizeref=0.1,
             ), 
             text=['Price: {}<br>Quantity: {}'.format(int(price), size) for price, size in zip(vendor_data['price'], vendor_data['quantity'])],
-            name = vendor))
+            name = vendor_mapping[vendor]))
     
     
     country_data = df[df['model'] == tab3]
@@ -696,15 +701,20 @@ def update_price_graph_1(
             
             )
     )
-    # Boxplot внизу
+
     
+    # Boxplot внизу
+    model_counts = full_df['model'].value_counts()
+    models_with_enough_data = model_counts[model_counts > 15].index.tolist()
+    boxplot_df_filtered = full_df[full_df['model'].isin(models_with_enough_data)]
     
     trace_box = [go.Box(
         name='Анализ цен на модели',
-        x=full_df['model'],
-        y=full_df['price_normalized'],
+        x=boxplot_df_filtered['model'],
+        y=boxplot_df_filtered['price_normalized'],
         )]
-    df_current = full_df[full_df['date']==full_df['last_date']].groupby('model', as_index=False)['price_normalized'].max()
+    print(f"Модели с достаточным количеством данных (>10): {models_with_enough_data}")
+    df_current = boxplot_df_filtered[boxplot_df_filtered['date']==boxplot_df_filtered['last_date']].groupby('model', as_index=False)['price_normalized'].max()
     trace_box.append(go.Scatter(
         name = 'Текущая цена',
         x=df_current['model'],
