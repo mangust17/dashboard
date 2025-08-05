@@ -45,7 +45,6 @@ def get_group_from_dataframe(row):
     
 df = gf_price_normalize(df)
 df['group'] = df.apply(get_group_from_dataframe, axis=1)    
-print(df.columns)
 
 # Таблица нормализация
 df_for_tables = pd.DataFrame.from_records(PricesClean.objects.filter(date__gte=start_date).values())
@@ -547,7 +546,6 @@ def update_price_graph_1(
 
     excluded_countries = list(all_countries - included_countries)
 
-    print("Исключены:", ", ".join(excluded_countries))
 
     queryset = PricesClean.objects.filter(
         date__range=(start_date, end_date),
@@ -713,7 +711,7 @@ def update_price_graph_1(
         x=boxplot_df_filtered['model'],
         y=boxplot_df_filtered['price_normalized'],
         )]
-    print(f"Модели с достаточным количеством данных (>10): {models_with_enough_data}")
+
     df_current = boxplot_df_filtered[boxplot_df_filtered['date']==boxplot_df_filtered['last_date']].groupby('model', as_index=False)['price_normalized'].max()
     trace_box.append(go.Scatter(
         name = 'Текущая цена',
