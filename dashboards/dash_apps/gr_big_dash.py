@@ -146,8 +146,8 @@ app.layout = html.Div([  # Container
                             html.Div([
                                 dcc.RadioItems(
                                 id='ddp_check',
-                                options=['Считаем без наценки', 'Считаем ddp', 'Считаем ddp + НДС'],
-                                value='Считаем без наценки',
+                                options=['Считаем ddp', 'Считаем ddp + НДС'],
+                                value='Считаем ddp',
                                 className='form-check'
                                 )],className="d-flex align-items-center mt-4"),
                             html.Div([
@@ -467,8 +467,6 @@ def select_all_models(select_all_value, model_options):
     return []
 
 
-
-
 @app.callback(
     [
         Output('price-graph-1', 'figure'),
@@ -552,25 +550,37 @@ def update_price_graph_1(
         model__in=models
     ).exclude(country__in=excluded_countries)
   
+    # Формируем единый df со спекам
     if radio_check=='Считаем по среднему':
-        queryset_grouped = queryset.values('date','model').annotate(price=Avg('price'), quantity = Sum('quantity'))
+        queryset_grouped_specs = queryset.values('date','model','country_id__spec').annotate(price=Avg('price'), quantity = Sum('quantity'))
     else:
-        queryset_grouped = queryset.values('date','model').annotate(price=Min('price'), quantity = Sum('quantity'))
+        queryset_grouped_specs = queryset.values('date','model','country_id__spec').annotate(price=Min('price'), quantity = Sum('quantity'))
 
-    df = pd.DataFrame.from_records(queryset_grouped)
-    df[['price','quantity']]=df[['price','quantity']].astype(int)
+    df_all = pd.DataFrame.from_records(queryset_grouped_specs)
+    if not df_all.empty:
+        df_all[['price','quantity']] = df_all[['price','quantity']].astype(int)
+
+        if ddp_check == 'Считаем ddp':
+            dap_price = (df_all.price + logistics) * (1 + margin_percent / 100)
+            price_with_duty = dap_price * (1 + duty_percent / 100)
+            ddp_price = price_with_duty * (1 + conversion_rate / 100)
+            df_all.price = ddp_price
+        elif ddp_check == 'Считаем ddp + НДС':
+            dap_price = (df_all.price + logistics) * (1 + margin_percent / 100)
+            price_with_duty = dap_price * (1 + duty_percent / 100)
+            ddp_price = price_with_duty * (1 + conversion_rate / 100)
+            df_all.price = ddp_price * 1.2
+
+    # Представление по моделям (без разбивки по спекам)
+    if not df_all.empty:
+        if radio_check=='Считаем по среднему':
+            df = df_all.groupby(['date','model'], as_index=False).agg(price=('price','mean'), quantity=('quantity','sum'))
+        else:
+            df = df_all.groupby(['date','model'], as_index=False).agg(price=('price','min'), quantity=('quantity','sum'))
+    else:
+        df = pd.DataFrame(columns=['date','model','price','quantity'])
+
     df = gf_price_normalize(df)
-
-    if ddp_check == 'Считаем ddp':
-        dap_price = (df.price + logistics) * (1 + margin_percent / 100)
-        price_with_duty = dap_price * (1 + duty_percent / 100)
-        ddp_price = price_with_duty * (1 + conversion_rate / 100)
-        df.price = ddp_price
-    elif ddp_check == 'Считаем ddp + НДС':
-        dap_price = (df.price + logistics) * (1 + margin_percent / 100)
-        price_with_duty = dap_price * (1 + duty_percent / 100)
-        ddp_price = price_with_duty * (1 + conversion_rate / 100)
-        df.price = ddp_price * 1.2
 
 
 
@@ -649,30 +659,31 @@ def update_price_graph_1(
     ))
     
     
-    # График по спекам
-    if radio_check=='Считаем по среднему':
-        df_clean = pd.DataFrame.from_records(queryset.filter(model = tab5).values('date','model','country_id__spec').annotate(price_avg = Avg('price')))
-    else:
-        df_clean = pd.DataFrame.from_records(queryset.filter(model = tab5).values('date','model','country_id__spec').annotate(price_avg = Min('price')))
-        
-    min_axis = df_clean['price_avg'].min()*0.95
-    max_axis = df_clean['price_avg'].max()*1.05
+    # График по спекам 
     trace_specs = []
-    for country in df_clean[(df_clean['model'] == tab5)]['country_id__spec'].unique():
-        trace_specs.append(go.Scatter(
-            x=df_clean[df_clean['country_id__spec']==country]['date'], 
-            y=df_clean[df_clean['country_id__spec']==country]['price_avg'], 
-            name = country,
-            mode='lines+markers',
-            line=dict(width=2, shape='spline')))
+    if 'df_all' in locals() and not df_all.empty:
+        df_specs_model = df_all[df_all['model'] == tab5]
+        if not df_specs_model.empty:
+            min_axis = df_specs_model['price'].min()*0.95
+            max_axis = df_specs_model['price'].max()*1.05
+            for country in df_specs_model['country_id__spec'].unique():
+                cur = df_specs_model[df_specs_model['country_id__spec']==country]
+                trace_specs.append(go.Scatter(
+                    x=cur['date'], 
+                    y=cur['price'], 
+                    name = country,
+                    mode='lines+markers',
+                    line=dict(width=2, shape='spline')))
+        else:
+            min_axis = 0
+            max_axis = 0
+    else:
+        min_axis = 0
+        max_axis = 0
     spec_layout = copy.deepcopy(default_layout)
     spec_layout.update(
         yaxis=dict(range = [min_axis,max_axis])
     )
-    
-    
-    
-
     
     # Двойной график
     trace_double_new = []
@@ -744,16 +755,16 @@ def update_price_graph_1(
     )
 
     layout_absolute_graph = copy.deepcopy(default_layout)
-    abs_min = min(df[df['model']==tab3]['price'])*0.99
-    abs_max = max(df[df['model']==tab3]['price'])*1.01
+    abs_min = min(df[df['model']==tab3]['price'])*0.99 if not df.empty else 0
+    abs_max = max(df[df['model']==tab3]['price'])*1.01 if not df.empty else 0
     layout_absolute_graph.update(
         yaxis=dict(title='date', range = [abs_min,abs_max]),
         showlegend=False,
         hovermode="x",
     )
     
-    price_max = max(df[df['model']==tab4]['price'])*1.6
-    quantity_min = -max(df[df['model']==tab4]['quantity'])*1.01
+    price_max = max(df[df['model']==tab4]['price'])*1.6 if not df.empty else 0
+    quantity_min = -max(df[df['model']==tab4]['quantity'])*1.01 if not df.empty else 0
     layout_double_y = copy.deepcopy(default_layout)
     layout_double_y.update(
         yaxis=dict(title='Цена', side='left', showgrid=True, range = [quantity_min,price_max]),
@@ -786,16 +797,17 @@ def update_price_graph_1(
         yaxis_title="",
         margin=dict(l=0, r=0, t=0, b=0),   
     )
-    x_min = df['date'].min()
-    x_max = df['date'].max()
+    x_min = df['date'].min() if not df.empty else None
+    x_max = df['date'].max() if not df.empty else None
     
     # Определяем минимальное и максимальное значение по оси Y для цены
-    y_min_price = df['price'].min()
-    y_max_price = df['price'].max()
+    y_min_price = df['price'].min() if not df.empty else None
+    y_max_price = df['price'].max() if not df.empty else None
     
    
     # Устанавливаем масштаб для осей X и Y в макете
-    layout['xaxis']['range'] = [x_min, x_max]
+    if x_min is not None and x_max is not None:
+        layout['xaxis']['range'] = [x_min, x_max]
 
     tabs = [
         dcc.Tab(label=model, value=model, className="bg-secondary p-1 mb-3") for model in models
@@ -853,12 +865,27 @@ def update_price_graph_1(
     
 
 
+    # Пересчёт данных таблиц по DDP
+    df_tables = df_for_tables.copy()
+    if not df_tables.empty:
+        price_cols = ['price', 'current_price', 'median_price', 'min_price']
+        for col in price_cols:
+            if col in df_tables.columns:
+                if ddp_check == 'Считаем ddp':
+                    dap = (df_tables[col] + logistics) * (1 + margin_percent / 100)
+                    duty_applied = dap * (1 + duty_percent / 100)
+                    df_tables[col] = duty_applied * (1 + conversion_rate / 100)
+                elif ddp_check == 'Считаем ddp + НДС':
+                    dap = (df_tables[col] + logistics) * (1 + margin_percent / 100)
+                    duty_applied = dap * (1 + duty_percent / 100)
+                    df_tables[col] = duty_applied * (1 + conversion_rate / 100) * 1.2
+
     return (
         {'data': trace1, 'layout': layout},
         {'data': trace2, 'layout': layout_bar,},
         tree, 
-        df_for_tables.sort_values('delta', ascending=True).head(13).to_dict(orient='records'), 
-        df_for_tables.sort_values('delta', ascending=False).head(13).to_dict(orient='records'), 
+        df_tables.sort_values('delta', ascending=True).head(13).to_dict(orient='records'), 
+        df_tables.sort_values('delta', ascending=False).head(13).to_dict(orient='records'), 
         tabs, 
         {'data': trace3, 'layout': layout_buble}, 
         tabs2, 
