@@ -621,20 +621,29 @@ def update_price_graph_1(
     vendor_df = pd.DataFrame.from_records(vendor_qs).sort_values('quantity', ascending=False).head(10)
 
     if not vendor_df.empty:
-        
-        if ddp_check == 'Считаем без наценки':
-            vendor_df['price'] = round(vendor_df['price'] + 5 + (vendor_df['price'] * 0.005))
-        elif ddp_check == 'Считаем ddp':
-            dap_price = (vendor_df['price'] + logistics) * (1 + margin_percent / 100)
-            price_with_duty = dap_price * (1 + duty_percent / 100)
-            ddp_price = price_with_duty * (1 + conversion_rate / 100)
-            vendor_df['price'] = ddp_price
-        elif ddp_check == 'Считаем ddp + НДС':
-            dap_price = (vendor_df['price'] + logistics) * (1 + margin_percent / 100)
-            price_with_duty = dap_price * (1 + duty_percent / 100)
-            ddp_price = price_with_duty * (1 + conversion_rate / 100)
-            vendor_df['price'] = ddp_price * 1.2
-        
+            
+            if ddp_check == 'Считаем без наценки':
+                vendor_df['price'] = round(vendor_df['price'] + 5 + (vendor_df['price'] * 0.005))
+            elif ddp_check == 'Считаем ddp':
+                dap_price = (vendor_df['price'] + logistics) * (1 + margin_percent / 100)
+                price_with_duty = dap_price * (1 + duty_percent / 100)
+                ddp_price = price_with_duty * (1 + conversion_rate / 100)
+                vendor_df['price'] = ddp_price
+            elif ddp_check == 'Считаем ddp + НДС':
+                dap_price = (vendor_df['price'] + logistics) * (1 + margin_percent / 100)
+                price_with_duty = dap_price * (1 + duty_percent / 100)
+                ddp_price = price_with_duty * (1 + conversion_rate / 100)
+                vendor_df['price'] = ddp_price * 1.2
+
+    layout_absolute_graph = copy.deepcopy(default_layout)
+    abs_min = min(df[df['model']==tab3]['price'])*0.99 if not df.empty else 0
+    abs_max = max(df[df['model']==tab3]['price'])*1.01 if not df.empty else 0
+    layout_absolute_graph.update(
+        yaxis=dict(title='date', range = [abs_min,abs_max]),
+        showlegend=False,
+        hovermode="x",
+    ) 
+            
     vendor_mapping = {}
     for i, vendor in enumerate(vendor_df['vendor'].unique(), 1):
         vendor_mapping[vendor] = f"Поставщик {i}"
@@ -770,15 +779,13 @@ def update_price_graph_1(
     layout_buble.update(
         showlegend=False,
     )
-
-    layout_absolute_graph = copy.deepcopy(default_layout)
-    abs_min = min(df[df['model']==tab3]['price'])*0.99 if not df.empty else 0
-    abs_max = max(df[df['model']==tab3]['price'])*1.01 if not df.empty else 0
-    layout_absolute_graph.update(
-        yaxis=dict(title='date', range = [abs_min,abs_max]),
-        showlegend=False,
-        hovermode="x",
+    min_price = vendor_df['price'].min() * 0.95
+    max_price = vendor_df['price'].max() * 1.05
+    layout_buble.update(
+        yaxis=dict(range=[min_price, max_price])
     )
+
+    
     
     price_max = max(df[df['model']==tab4]['price'])*1.6 if not df.empty else 0
     quantity_min = -max(df[df['model']==tab4]['quantity'])*1.01 if not df.empty else 0
