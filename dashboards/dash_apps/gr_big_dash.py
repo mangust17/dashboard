@@ -40,6 +40,10 @@ def get_group_from_dataframe(row):
         return '16 PRO, 16 PRO MAX'
     elif '16' in model or '16 PLUS' in model:
         return '16, 16 PLUS'
+    elif '17 PRO' in model or '17 PRO MAX' in model:
+        return '17 PRO, 17 PRO MAX'
+    elif '17' in model or '17 PLUS' in model:
+        return '17, 17 PLUS'
     else:
         return 'OTHER'
     
