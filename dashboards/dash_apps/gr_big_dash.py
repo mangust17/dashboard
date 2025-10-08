@@ -146,8 +146,8 @@ app.layout = html.Div([  # Container
                             html.Div([
                                 dcc.RadioItems(
                                 id='ddp_check',
-                                options=['Считаем ddp', 'Считаем ddp + НДС'],
-                                value='Считаем ddp',
+                                options=['Считаем без наценки','Считаем ddp', 'Считаем ddp + НДС'],
+                                value='Считаем без наценки',
                                 className='form-check'
                                 )],className="d-flex align-items-center mt-4"),
                             html.Div([
@@ -522,7 +522,7 @@ def update_price_graph_1(
     conversion_rate
 ):
     if not models:
-        return dash.no_update  # fallback
+        return 0  # fallback
 
     tab, tab2, tab3, tab4, tab5 = (models[0] if t not in models else t for t in (tab, tab2, tab3, tab4, tab5))
 
@@ -560,7 +560,9 @@ def update_price_graph_1(
     if not df_all.empty:
         df_all[['price','quantity']] = df_all[['price','quantity']].astype(int)
 
-        if ddp_check == 'Считаем ddp':
+        if ddp_check == 'Считаем без наценки':
+            df_all.price = round(df_all.price + 5 + (df_all.price * 0.005))
+        elif ddp_check == 'Считаем ddp':
             dap_price = (df_all.price + logistics) * (1 + margin_percent / 100)
             price_with_duty = dap_price * (1 + duty_percent / 100)
             ddp_price = price_with_duty * (1 + conversion_rate / 100)
@@ -617,7 +619,22 @@ def update_price_graph_1(
         vendor_qs = PricesClean.objects.filter(date__range=(start_date, end_date),model=tab2).exclude(country="CN").values('date','model','vendor').annotate(price=Avg('price'), quantity = Sum('quantity'))   
              
     vendor_df = pd.DataFrame.from_records(vendor_qs).sort_values('quantity', ascending=False).head(10)
-    
+
+    if not vendor_df.empty:
+        
+        if ddp_check == 'Считаем без наценки':
+            vendor_df['price'] = round(vendor_df['price'] + 5 + (vendor_df['price'] * 0.005))
+        elif ddp_check == 'Считаем ddp':
+            dap_price = (vendor_df['price'] + logistics) * (1 + margin_percent / 100)
+            price_with_duty = dap_price * (1 + duty_percent / 100)
+            ddp_price = price_with_duty * (1 + conversion_rate / 100)
+            vendor_df['price'] = ddp_price
+        elif ddp_check == 'Считаем ddp + НДС':
+            dap_price = (vendor_df['price'] + logistics) * (1 + margin_percent / 100)
+            price_with_duty = dap_price * (1 + duty_percent / 100)
+            ddp_price = price_with_duty * (1 + conversion_rate / 100)
+            vendor_df['price'] = ddp_price * 1.2
+        
     vendor_mapping = {}
     for i, vendor in enumerate(vendor_df['vendor'].unique(), 1):
         vendor_mapping[vendor] = f"Поставщик {i}"
@@ -871,7 +888,9 @@ def update_price_graph_1(
         price_cols = ['price', 'current_price', 'median_price', 'min_price']
         for col in price_cols:
             if col in df_tables.columns:
-                if ddp_check == 'Считаем ddp':
+                if ddp_check == 'Считаем без наценки':
+                    df_tables[col] = round(df_tables[col] + 5 + (df_tables[col] * 0.005))
+                elif ddp_check == 'Считаем ddp':
                     dap = (df_tables[col] + logistics) * (1 + margin_percent / 100)
                     duty_applied = dap * (1 + duty_percent / 100)
                     df_tables[col] = duty_applied * (1 + conversion_rate / 100)
