@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from .views_api import *
 from django.contrib.auth.views import LoginView
 from django.views.generic import RedirectView
 
@@ -10,4 +11,6 @@ urlpatterns = [
     path("dash", plotly_dash, name="home"),
     path("logout", logout_user, name="logout"),
     path("tenders", tenders, name="tenders"),
+    #API
+    path("api/get_models/", get_models, name="get_models" )
 ]

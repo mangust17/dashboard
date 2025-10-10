@@ -3,6 +3,7 @@ from django.urls import reverse
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User, AbstractUser
+from .models_tender import *
 
 
 class InnerCompanys(models.Model):
