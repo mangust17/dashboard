@@ -1,9 +1,5 @@
 from django.db import models
-from django.urls import reverse
-from datetime import datetime
-from django.utils import timezone
-from django.contrib.auth.models import User, AbstractUser
-
+from django.contrib.auth.models import User
 
 class TenderContent(models.Model):
     class SimSpec(models.TextChoices):
@@ -13,7 +9,7 @@ class TenderContent(models.Model):
 
     model = models.CharField(max_length=80)
     sim_spec = models.CharField(
-        max_length=7, choices=SimSpec.choices, default=SimSpec.STANDARD
+        max_length=10, choices=SimSpec.choices, default=SimSpec.STANDARD
     )
     order_qty = models.IntegerField()
 
@@ -45,7 +41,8 @@ class PartnerOffers(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="edited_offers",
+        related_name="offers_edited",
+        
     )
 
 
@@ -53,7 +50,9 @@ class PartnerOffersActions(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
-        related_name="edited_offers",
+        related_name="offers_actions",
+        null=True,
+        blank=True,
     )
     action = models.CharField(max_length=10)
     created_at = models.DateTimeField(auto_now_add=True)
