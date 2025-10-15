@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
+
 
 class TenderContent(models.Model):
     class SimSpec(models.TextChoices):
@@ -8,6 +10,13 @@ class TenderContent(models.Model):
         ULTRA = "SIM+ESIM", "Сим+ЕСим"
 
     model = models.CharField(max_length=80)
+    buyer_name = models.CharField(default="unknown")
+    colors = ArrayField(
+        models.CharField(max_length=50),
+        blank=True,
+        null=True,
+        default=list,
+    )
     sim_spec = models.CharField(
         max_length=10, choices=SimSpec.choices, default=SimSpec.STANDARD
     )
@@ -42,17 +51,23 @@ class PartnerOffers(models.Model):
         null=True,
         blank=True,
         related_name="offers_edited",
-        
     )
+
+
+class OfferWinners(models.Model):
+    tender = models.ForeignKey(
+        TenderContent, on_delete=models.CASCADE, related_name="winners"
+    )
+    offer = models.ForeignKey(
+        PartnerOffers, on_delete=models.CASCADE, related_name="winners"
+    )
+    qty = models.IntegerField()
 
 
 class PartnerOffersActions(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        related_name="offers_actions",
-        null=True,
-        blank=True,
-    )
-    action = models.CharField(max_length=10)
+    user = models.CharField(max_length=40)
+    action = models.CharField(max_length=40)
+    target = models.CharField(max_length=40, blank=True, null=True)
+    old_value = models.CharField(max_length=40, blank=True, null=True)
+    new_value = models.CharField(max_length=40, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
