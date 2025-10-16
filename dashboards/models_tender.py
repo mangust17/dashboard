@@ -9,6 +9,11 @@ class TenderContent(models.Model):
         PREMIUM = "ESIM", "ЕСим"
         ULTRA = "SIM+ESIM", "Сим+ЕСим"
 
+    class Status(models.TextChoices):
+        ACTIVE = "active", "Active"
+        CLOSED = "closed", "Closed"
+        CANCELED = "canceled", "Canceled"
+
     model = models.CharField(max_length=80)
     buyer_name = models.CharField(default="unknown")
     colors = ArrayField(
@@ -21,6 +26,14 @@ class TenderContent(models.Model):
         max_length=10, choices=SimSpec.choices, default=SimSpec.STANDARD
     )
     order_qty = models.IntegerField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+    )
+
+    finish_reason = models.CharField(max_length=70, blank=True, null=True)
 
     partner_min_price = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True
@@ -43,6 +56,7 @@ class PartnerOffers(models.Model):
     )
     seller_name = models.CharField(max_length=20)
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    qty = models.IntegerField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_editor = models.ForeignKey(

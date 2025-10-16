@@ -4,14 +4,17 @@ from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from .serializers import *
 from urllib.parse import unquote
+from datetime import date, timedelta
+import pandas as pd
+from django.db.models import Avg, Sum
 
 
 @api_view(["GET"])
 def get_models(request):
-    models_qs = (
-        PricesClean.objects.values_list("model", flat=True).distinct().order_by("model")
-    )
-    data = [{"label": model, "value": model} for model in models_qs]
+    models_qs = PricesClean.objects.values_list("model", flat=True).distinct()
+    # обрезаем пробелы и фильтруем пустые строки
+    models_set = sorted({model.strip() for model in models_qs if model.strip()})
+    data = [{"label": model, "value": model} for model in models_set]
     return JsonResponse(data, safe=False)
 
 
@@ -39,10 +42,29 @@ from .models_tender import TenderContent, PartnerOffers, OfferWinners
 
 
 @api_view(["GET"])
+def get_last_prices(request, model):
+    model_name = unquote(model)
+    date_minus_14 = date.today() - timedelta(days=14)
+
+    models_qs = (
+        PricesClean.objects.filter(model=model_name, date__gte=date_minus_14)
+        .values("date", "model")
+        .annotate(price=Avg("price"), qty=Sum("quantity"))
+        .order_by("date")
+    )
+
+    data = list(models_qs)  # преобразуем QuerySet в список словарей
+
+    return JsonResponse(data, safe=False)
+
+
+@api_view(["GET"])
 def get_full_table(request):
     result = []
 
-    tenders = TenderContent.objects.prefetch_related("offers", "winners__offer")
+    tenders = TenderContent.objects.filter(status="active").prefetch_related(
+        "offers", "winners__offer"
+    )
 
     for tender in tenders:
         row = {
@@ -58,12 +80,12 @@ def get_full_table(request):
         }
 
         # Добавляем колонки с ценами всех офферов
-        offers = tender.offers.all()
+        offers = tender.offers.all().distinct()
         for offer in offers:
             row[f"offer_price_{offer.seller_name}"] = float(offer.price or 0)
 
         # Добавляем колонки с количеством победителей
-        winners = tender.winners.all()
+        winners = tender.winners.all().distinct()
         for winner in winners:
             row[f"winner_{winner.offer.seller_name}_qty"] = winner.qty
 
@@ -103,5 +125,5 @@ class WinnersViewSet(viewsets.ModelViewSet):
 
 
 class ActionsViewSet(viewsets.ModelViewSet):
-    queryset = PartnerOffersActions.objects.all()
+    queryset = PartnerOffersActions.objects.all().order_by("-created_at")
     serializer_class = PartnerActionsSerializer

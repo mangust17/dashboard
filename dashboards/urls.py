@@ -23,5 +23,6 @@ urlpatterns = [
     path("api/get_models/", get_models, name="get_models"),
     path("api/get_colors/<str:model>/", get_colors, name="get_colors"),
     path("api/full_table/", get_full_table, name="get_all"),
+    path("api/get_stats/", get_last_prices, name="get_stats"),
     path("api/", include(router.urls)),
 ]
