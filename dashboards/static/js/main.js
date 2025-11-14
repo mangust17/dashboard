@@ -7,8 +7,9 @@ $(document).ready(function () {
     });
 
     if (typeof currentUsername !== 'undefined' && currentUsername === 'test_vtb') {
-        $('.sidebar-toggler').click()
-        $('.sidebar-toggler').hide()
+        // Альтернативный вариант - принудительно закрыть
+        $('.sidebar').hide();
+        $('.content').css('margin-left', '0').css('width', '100%');
     }
 
     // Активация ближайшей формы
