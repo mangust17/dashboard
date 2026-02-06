@@ -7,13 +7,16 @@
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <meta content="" name="keywords">
         <meta content="" name="description">
-        <!-- Favicon --><link href="{% static "img/fav_1.png" %}" rel="icon">
-        <link href="{% static "img/fav_1.png" %}" rel="icon"> 
+        <!-- Favicon -->
+        <link href="{% static "img/fav_1.png" %}" rel="icon">
+        <link href="{% static "img/fav_1.png" %}" rel="icon">
         {% include "styles.html" %}
     </head>
-    
+    <script>var currentUsername = '{{ user.username }}';</script>
     <body data-bs-theme="dark" class="bg-secondary text-light">
-        <div class="container-fluid position-relative d-flex p-0">{% include "menu.html" %}</div>
+        {% if user.username != 'test_vtb' %}
+            <div class="container-fluid position-relative d-flex p-0">{% include "menu.html" %}</div>
+        {% endif %}
         <div class="content">
             {% include 'top_navbar.html' %}
             {% block content %}
@@ -26,12 +29,12 @@
                 </div>
             </div>
         </div>
-    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-{% include "js.html" %}
-<script>
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+        {% include "js.html" %}
+        <script>
     $(document).ready(function() {
         $('.select2-field').select2();
     });
-</script>
-</body>
+        </script>
+    </body>
 </html>

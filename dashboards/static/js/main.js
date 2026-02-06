@@ -6,18 +6,24 @@ $(document).ready(function () {
         });
     });
 
+    if (typeof currentUsername !== 'undefined' && currentUsername === 'test_vtb') {
+        // Альтернативный вариант - принудительно закрыть
+        $('.sidebar').hide();
+        $('.content').css('margin-left', '0').css('width', '100%');
+    }
+
     // Активация ближайшей формы
     $(".fileform-activator").each(function () {
         $(this).click(function () {
             var fileForm = $(this).parent().parent().find('input[type=file]');
             fileForm.click();
         })
-        $(this).parent().parent().find('input[type=file]').change(function(event) {
+        $(this).parent().parent().find('input[type=file]').change(function (event) {
             var files = event.target.files;
             if (files.length > 0) {
                 var fileName = files[0].name;
                 $(this).parent().find('input[type=text][disabled]').val(fileName);
-                setTimeout(function() {
+                setTimeout(function () {
                     console.log(fileName);
                 }, 100);
 
@@ -77,7 +83,7 @@ $(document).ready(function () {
     // Bootstrap tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
+        return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
 })(jQuery);

@@ -52,6 +52,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_plotly_dash.middleware.BaseMiddleware",
     "django_plotly_dash.middleware.ExternalRedirectionMiddleware",
+    'dashboards.middleware.BlockUsersMiddleware',
 ]
 
 ROOT_URLCONF = "dashsite.urls"
