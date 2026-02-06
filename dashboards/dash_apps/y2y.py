@@ -1,5 +1,6 @@
-from ...models import PricesClean, AggregatedModel, CurrencyNew
-from ._app_graphs import *
+from dashboards.models import PricesClean, AggregatedModel, CurrencyNew
+from dashboards.utils_classes import GraphManager
+from .app_graphs import *
 from dash import html, dcc
 from dash.dependencies import Input, Output
 from datetime import date, timedelta
@@ -7,7 +8,6 @@ from django_plotly_dash import DjangoDash
 import plotly.graph_objs as go
 from django.db.models import Avg, Sum, OuterRef, Subquery, F, Min
 import pandas as pd
-from ...utils_classes import GraphManager
 import re
 
 external_stylesheets = ["/static/css/bootstrap.min.css", "/static/css/style.css"]
