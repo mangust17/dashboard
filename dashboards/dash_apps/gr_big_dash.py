@@ -25,7 +25,7 @@ end_date = date.today()
 
 app = DjangoDash('BigGraph', external_stylesheets=external_stylesheets, external_scripts=external_scripts)
 
-queryset = PricesClean.objects.filter(date__range=(start_date, end_date)).values('date','model').annotate(price=Avg('price'), quantity = Avg('quantity'))
+queryset = PricesClean.objects.filter(date__range=(start_date, end_date)).values('date','model').annotate(price=Avg('price'), quantity = Avg('quantity')).exclude(vendor__in=['Hafza', 'Japan gulaj', 'Citicall', 'King easi'])
 df = pd.DataFrame.from_records(queryset)
 
 def get_group_from_dataframe(row):
@@ -51,11 +51,11 @@ df = gf_price_normalize(df)
 df['group'] = df.apply(get_group_from_dataframe, axis=1)    
 
 # Таблица нормализация
-df_for_tables = pd.DataFrame.from_records(PricesClean.objects.filter(date__gte=start_date).values())
+df_for_tables = pd.DataFrame.from_records(PricesClean.objects.filter(date__gte=start_date).exclude(vendor__in=['Hafza', 'Japan gulaj', 'Citicall', 'King easi']).values())
 df_for_tables = gf_price_normalize(df_for_tables)
 full_df = df_for_tables.copy()
 
-top5 = PricesClean.objects.filter(date__gte=start_date).values('model').annotate(quantity=Sum('quantity')).order_by('-quantity').values_list('model', flat=True)[:5]
+top5 = PricesClean.objects.filter(date__gte=start_date).values('model').annotate(quantity=Sum('quantity')).exclude(vendor__in=['Hafza', 'Japan gulaj', 'Citicall', 'King easi']).order_by('-quantity').values_list('model', flat=True)[:5]
 top5 = list(top5)
 
 df_for_tables = df_for_tables[df_for_tables['date']==df_for_tables['last_date']][['model','current_price','median_price','date','price','min_price']]
@@ -534,7 +534,7 @@ def update_price_graph_1(
     PricesClean.objects.filter(
         date__range=(start_date, end_date),
         model__in=models
-    ).values_list('country', flat=True).distinct()
+    ).exclude(vendor__in=['Hafza', 'Japan gulaj', 'Citicall', 'King easi']).values_list('country', flat=True).distinct()
 )
 
     included_countries = set()
@@ -552,7 +552,7 @@ def update_price_graph_1(
     queryset = PricesClean.objects.filter(
         date__range=(start_date, end_date),
         model__in=models
-    ).exclude(country__in=excluded_countries)
+    ).exclude(country__in=excluded_countries,vendor__in=['Hafza', 'Japan gulaj', 'Citicall', 'King easi'])
   
     # Формируем единый df со спекам
     if radio_check=='Считаем по среднему':
@@ -618,9 +618,9 @@ def update_price_graph_1(
         
     trace3 = []
     if len(country_check) == 1:
-        vendor_qs = PricesClean.objects.filter(date__range=(start_date, end_date),model=tab2).values('date','model','vendor').annotate(price=Avg('price'), quantity = Sum('quantity'))
+        vendor_qs = PricesClean.objects.filter(date__range=(start_date, end_date),model=tab2).exclude(vendor__in=['Hafza', 'Japan gulaj', 'Citicall', 'King easi']).values('date','model','vendor').annotate(price=Avg('price'), quantity = Sum('quantity'))
     else:
-        vendor_qs = PricesClean.objects.filter(date__range=(start_date, end_date),model=tab2).exclude(country="CN").values('date','model','vendor').annotate(price=Avg('price'), quantity = Sum('quantity'))   
+        vendor_qs = PricesClean.objects.filter(date__range=(start_date, end_date),model=tab2).exclude(country="CN",vendor__in=['Hafza', 'Japan gulaj', 'Citicall', 'King easi']).values('date','model','vendor').annotate(price=Avg('price'), quantity = Sum('quantity'))   
              
     vendor_df = pd.DataFrame.from_records(vendor_qs).sort_values('quantity', ascending=False).head(10)
 
@@ -862,7 +862,7 @@ def update_price_graph_1(
 
     
     # Карта   
-    map_data = PricesClean.objects.filter(date__range=(start_date, end_date)).values('date', 'country').annotate(
+    map_data = PricesClean.objects.filter(date__range=(start_date, end_date)).exclude(vendor__in=['Hafza', 'Japan gulaj', 'Citicall', 'King easi']).values('date', 'country').annotate(
         iso_alpha = F("country_id__iso_alpha"),
         continent = F('country_id__spec'),
         qty = Sum('quantity')

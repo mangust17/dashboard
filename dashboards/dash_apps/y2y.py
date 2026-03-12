@@ -45,7 +45,7 @@ def get_models_sold_in_year(year):
     else:
         date_start, date_end = date(2024, 1, 1), date(2024, 12, 31)
     sold = (
-        PricesClean.objects.filter(date__range=(date_start, date_end))
+        PricesClean.objects.filter(date__range=(date_start, date_end)).exclude(vendor__in=['Hafza', 'Japan gulaj', 'Citicall', 'King easi'])
         .values_list("model", flat=True)
         .distinct()
         .order_by("model")
@@ -373,7 +373,7 @@ def build_combined_price_dataframe(
         datetime__date=OuterRef("date"), code="USD"
     ).values("value")
 
-    base_query = PricesClean.objects
+    base_query = PricesClean.objects.exclude(vendor__in=['Hafza', 'Japan gulaj', 'Citicall', 'King easi'])
 
     exclude_specs = []
     if "usa" not in regions:
